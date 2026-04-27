@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; default-src 'self' 'unsafe-inline'; connect-src *; img-src * data: blob:; font-src *; style-src * 'unsafe-inline';">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>TypeBlast 🚀 — Typing Adventure</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- BLOBS -->
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<!-- HIDDEN INPUT -->
+<input type="text" id="hiddenInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="-1">
+
+<!-- SECURITY OVERLAY -->
+<div id="securityOverlay">
+  <div id="warningIcon">🚫</div>
+  <h2>FOCUS LOST — TEST ENDED!</h2>
+  <p>Aapne test ke dauran window switch ya focus band kiya.<br>Security violation ke karan yeh attempt count nahi hogi.</p>
+  <div id="violationCount"></div>
+  <div id="unlockHintMsg" style="display:none;text-align:center;margin-top:10px;">
+    <p style="color:var(--yellow);font-size:0.8rem;letter-spacing:1px;line-height:2;">🔑 Enter secret command to unlock:<br><span style="font-size:0.7rem;opacity:0.7">Alt+L → Alt+O → Alt+A → Alt+Ctrl</span></p>
+  </div>
+  <div id="unlockProgressDisplay" style="display:none;font-size:1.6rem;letter-spacing:10px;margin-top:4px;">● ● ● ●</div>
+  <button class="btn btn-primary" onclick="restartAfterViolation()" style="margin-top:8px">↺ RESTART TEST</button>
+</div>
+
+<!-- WARNING TOAST -->
+<div id="warningToast">⛔ Action not allowed!</div>
+
+<!-- WEAK TYPING OVERLAY -->
+<div id="weakTypingOverlay">
+  <div class="weak-icon">⚠️</div>
+  <h2>Your Typing is Very Weak! 😤</h2>
+  <p>10 se zyada galat letters — Question dobara shuru hoga!</p>
+  <div id="weakCountdown">5</div>
+</div>
+
+<!-- PROMPT ERROR OVERLAY -->
+<div id="promptErrorOverlay">
+  <div class="err-icon">❌</div>
+  <h2>Please Write Error Free Prompt! ✍️</h2>
+  <p style="color:var(--muted);font-weight:600;text-align:center;">Ek bhi letter galat hai — Dhyan se type karo aur dobara try karo!</p>
+</div>
+
+<!-- PROMPT COMPLETE OVERLAY -->
+<div id="promptCompleteOverlay">
+  <div style="font-size:3.5rem;animation:logoWiggle 1s infinite;">✨</div>
+  <h2>Prompt Typed Perfectly! 🎉</h2>
+  <p style="color:var(--muted);font-weight:600;">Powered by <span style="color:var(--cyan);font-weight:800;">Gemini AI</span></p>
+
+  <button class="gen-img-main-btn" onclick="confirmModelAndGenerate()">
+    🖼️ Generate image from your prompt
+  </button>
+  <div class="enter-hint" style="opacity:0.6;font-size:0.7rem;margin-top:10px;">or press ENTER</div>
+</div>
+
+<!-- IMAGE GENERATION OVERLAY -->
+<div id="imageGenOverlay">
+  <div class="gen-stars" id="genStars"></div>
+  <div class="gen-title" id="genTitle">🎨 Creating Your Image...</div>
+  <div class="gen-model-badge" id="genModelBadge">🤖 Gemini AI</div>
+  <div class="gen-prompt-text" id="genPromptDisplay"></div>
+  <div class="gen-loader" id="genLoader">
+    <div class="gen-dot"></div>
+    <div class="gen-dot"></div>
+    <div class="gen-dot"></div>
+  </div>
+  <div class="gen-status" id="genStatus">BUILDING YOUR IMAGE...</div>
+  <div class="gen-image-container" id="genImageContainer">
+    <img id="genImage" src="" alt="AI Generated" crossorigin="anonymous">
+  </div>
+  <div class="gen-action-row" id="genActionRow" style="display:none;">
+    <button class="gen-new-btn" id="genNewBtn" onclick="closeImageGen()">🔄 New Prompt</button>
+    <button class="gen-dl-btn" id="genDlBtn" onclick="downloadImage()">⬇️ Download</button>
+    <button class="gen-new-btn" onclick="regenerateImage()" style="background:rgba(251,191,36,0.1);border-color:var(--yellow);color:var(--yellow);">🔀 Regenerate</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div id="resultModal">
+  <div class="result-card">
+    <div class="result-title">🏆 Session Complete!</div>
+    <div class="result-grade" id="resultGrade">A+</div>
+    <div class="result-subtitle" id="resultSubtitle">Excellent Performance!</div>
+    <div class="result-grid">
+      <div class="result-stat"><div class="result-stat-val" id="res-wpm">0</div><div class="result-stat-lbl">Avg WPM</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="res-acc">0%</div><div class="result-stat-lbl">Avg Acc</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="res-chars">0</div><div class="result-stat-lbl">Total Chars</div></div>
+      <div class="result-stat"><div class="result-stat-val" id="res-marks" style="color:var(--yellow)">0/100</div><div class="result-stat-lbl">Avg Marks</div></div>
+    </div>
+    <div class="q-results-title">Question-wise Results</div>
+    <table class="q-results-table" id="qResultsTable">
+      <thead><tr><th>#</th><th>WPM</th><th>Accuracy</th><th>Chars</th><th>Wrong</th><th>Marks</th><th>Status</th></tr></thead>
+      <tbody id="qResultsBody"></tbody>
+    </table>
+    <div class="result-progress"><div class="result-progress-fill" id="resultBar" style="width:0%"></div></div>
+    <div class="controls">
+      <button class="btn btn-primary" onclick="startNewSession()">🚀 NEW SESSION</button>
+      <button class="btn btn-secondary" onclick="closeResult()">CLOSE</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSITION OVERLAY -->
+<div id="transitionOverlay">
+  <h3 id="transitionTitle">⏱ TIME'S UP!</h3>
+  <p id="transitionMsg">Next question loading…</p>
+  <div id="nextCountdown">3</div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">⌨️</div>
+      <div class="logo-text">
+        <h1>TypeBlast Pro</h1>
+        <p>Speed · Accuracy · Fun</p>
+      </div>
+    </div>
+    <div class="secure-badge">SECURE TEST MODE</div>
+  </header>
+
+  <!-- LEVEL -->
+  <div class="level-section">
+    <div class="section-label">Choose Your Challenge</div>
+    <div class="level-buttons">
+      <button class="level-btn medium" onclick="setLevel('medium')"><span class="btn-emoji">🌊</span> MEDIUM</button>
+      <button class="level-btn hard active" onclick="setLevel('hard')"><span class="btn-emoji">🔥</span> HARD</button>
+      <button class="level-btn super" onclick="setLevel('super')"><span class="btn-emoji">⚡</span> SUPER <span class="level-tag">★ PRO</span></button>
+      <button class="level-btn prompt" onclick="setLevel('prompt')"><span class="btn-emoji">🎨</span> PROMPT TESTING <span class="level-tag">✨ AI</span></button>
+    </div>
+  </div>
+
+  <!-- QUESTION TRACKER -->
+  <div class="question-counter">
+    QUESTION <span id="qNumDisplay">1</span> / <span id="qTotalDisplay">5</span>
+    &nbsp;·&nbsp; <div class="q-pills" id="qPills"></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-value" id="wpmDisplay">0</div><div class="stat-label">WPM</div></div>
+    <div class="stat-card"><div class="stat-value" id="accDisplay">100%</div><div class="stat-label">Accuracy</div></div>
+    <div class="stat-card"><div class="stat-value" id="timerDisplay">2:00</div><div class="stat-label">Time Left</div></div>
+    <div class="stat-card"><div class="stat-value" id="errDisplay">0</div><div class="stat-label">Errors</div></div>
+  </div>
+
+  <!-- TIMER BAR -->
+  <div class="timer-bar-container"><div class="timer-bar-fill" id="timerBar"></div></div>
+
+  <!-- TEST AREA -->
+  <div class="test-area" onclick="focusInput()" id="testArea">
+    <div class="level-indicator hard" id="levelIndicator">🔥 HARD MODE</div>
+    <div class="paragraph-display" id="textDisplay"></div>
+    <div id="wordPreviewBox"></div>
+    <div class="click-prompt" id="clickPrompt">
+      <h3>⌨️ CLICK TO BEGIN!</h3>
+      <p>Focus here and start typing</p>
+    </div>
+  </div>
+
+  <!-- KEYBOARD HINT -->
+  <div class="keyboard-hint">
+    <span class="key-cap">TAB</span> restart &nbsp;·&nbsp;
+    <span class="key-cap">ESC</span> new session &nbsp;·&nbsp;
+    <span class="key-cap">ENTER</span> generate image (Prompt mode)
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls" style="margin-top:18px">
+    <button class="btn btn-primary" onclick="startTest()">▶ START TEST</button>
+    <button class="btn btn-secondary" onclick="restartTest()">↺ RESTART</button>
+    <button class="btn btn-secondary" onclick="skipQuestion()">⟶ SKIP</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
