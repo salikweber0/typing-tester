@@ -82,7 +82,7 @@ const paragraphs = {
 // ===================== CONFIG =====================
 const TOTAL_QUESTIONS = 5;
 const TIME_PER_QUESTION = 120;
-const PROMPT_TIME = 80; // 1 min 20 sec for prompt mode
+const PROMPT_TIME = 90; // 1 min 30 sec for prompt mode
 const MAX_VIOLATIONS = 3;
 
 // ===================== STATE =====================
