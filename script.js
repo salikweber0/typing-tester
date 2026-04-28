@@ -52,26 +52,37 @@ const paragraphs = {
   ],
   prompt: [
     "A majestic dragon soaring through a neon-lit cyberpunk city at midnight, with glowing wings and electric lightning crackling around its scales.",
-    "An enchanted forest with giant glowing mushrooms, fireflies dancing around ancient moss-covered stone ruins, bathed in soft moonlight.",
-    "A futuristic astronaut floating in deep space, surrounded by colorful nebulae and distant galaxies, with Earth visible in the background.",
-    "A cozy Japanese ramen shop on a rainy evening, warm orange light spilling onto wet cobblestones, steam rising from bowls.",
-    "An underwater kingdom with bioluminescent sea creatures, coral towers reaching skyward, a mermaid queen on her throne of pearls.",
-    "A giant robot standing in a sunflower field at golden hour, small birds perched on its shoulders, peaceful and serene.",
-    "A magical library with books floating in mid-air, staircases spiraling to the ceiling, soft glowing orbs lighting each shelf.",
-    "A lone samurai standing on a misty mountain cliff at sunrise, cherry blossom petals falling around them in slow motion.",
-    "An arctic explorer discovering a glowing crystal cave beneath the frozen tundra, ice formations reflecting rainbow light everywhere.",
-    "A steampunk airship sailing through clouds above a Victorian city, brass gears gleaming, crew members in goggles and top hats.",
-    "A wolf howling at a giant aurora-lit moon over a snow-covered pine forest, stars reflected in a frozen lake below.",
-    "A friendly alien spaceship landing in a sunflower field, curious children approaching while fireflies light up the summer evening.",
-    "A phoenix rising from golden flames above ancient Egyptian pyramids at dusk, feathers made of pure fire and starlight.",
-    "A tiny fairy village hidden inside a giant hollow oak tree, glowing windows, rope bridges, and lanterns lighting cobblestone paths.",
-    "A time-traveling train bursting through a portal of swirling galaxies and nebulae, passengers looking out in wide-eyed amazement.",
+    "An enchanted forest at twilight where every tree glows from within, giant luminous mushrooms tower overhead, and tiny fairies dance between the roots.",
+    "A futuristic astronaut floating in deep space, surrounded by colorful nebulae and shattered asteroids, Earth glowing blue in the far distance.",
+    "A cozy Japanese ramen shop on a rainy evening, warm amber light spilling onto wet cobblestones, steam curling from bowls in the window.",
+    "An underwater palace built from coral and obsidian, glowing jellyfish drifting through grand archways, a mermaid queen seated on a throne of pearls.",
+    "A giant robot covered in vines and wildflowers standing peacefully in a sunflower field at golden hour, sparrows nesting in its open hands.",
+    "A magical library where books orbit in slow spirals around a central glowing orb, ancient staircases vanish into clouds far above.",
+    "A lone samurai standing on a cliff at dawn, petals of cherry blossom swirling in slow motion, mist filling the valley far below.",
+    "A secret crystal cave beneath arctic ice, every surface refracting rainbow light, a polar fox sitting at the entrance.",
+    "A steampunk airship sailing above a Victorian city at sunset, brass propellers spinning, the crew watching fireworks burst below.",
+    "A wolf with a coat made of galaxies and stars howling at a massive aurora-lit moon over a frozen tundra lake.",
+    "A friendly alien spacecraft landing softly in a lavender field, curious deer approaching while glowing orbs drift out of the hatchway.",
+    "A phoenix made entirely of living fire and molten gold rising above the ruins of an ancient Egyptian temple at dusk.",
+    "A tiny village of mushroom houses hidden inside a giant hollow baobab tree, lit by warm lanterns, rope bridges connecting each level.",
+    "A time-traveling locomotive bursting through a swirling wormhole, passengers peering out windows at flashing scenes of different historical eras.",
+    "A vast floating island with waterfalls pouring off its edges into the clouds below, ancient ruins and a single glowing lighthouse on top.",
+    "A fox wearing a scholars robe reading a glowing book in a moonlit autumn library, stacks of ancient tomes reaching the ceiling.",
+    "An octopus DJ performing at an underwater rave, bioluminescent fish dancing in beams of colored light, coral speakers pulsing with bass.",
+    "A snow leopard leaping across mountain peaks in a blizzard, its fur shimmering with embedded constellations, northern lights blazing overhead.",
+    "A medieval blacksmith shop run entirely by friendly dragons, one breathing fire into the forge while another hammers a glowing sword.",
+    "A serene zen garden floating in the sky above the clouds, a monk meditating at its center, koi fish swimming through the air.",
+    "A city built entirely on the back of a colossal sleeping giant, streets winding between fingers, towers rising from the knuckles.",
+    "A child discovering a tiny glowing door at the base of an old oak tree, golden light pouring out, a world of wonder beyond.",
+    "A pirate ship made of glass sailing through a sea of stars in deep space, the crew navigating by the light of distant galaxies.",
+    "A rainforest waterfall flowing upward into the sky, exotic birds flying through the reversed cascade, butterflies resting on floating water drops.",
   ]
 };
 
 // ===================== CONFIG =====================
 const TOTAL_QUESTIONS = 5;
 const TIME_PER_QUESTION = 120;
+const PROMPT_TIME = 80; // 1 min 20 sec for prompt mode
 const MAX_VIOLATIONS = 3;
 
 // ===================== STATE =====================
@@ -126,6 +137,7 @@ function setLevel(level) {
 function buildPills() {
   const c = document.getElementById('qPills');
   c.innerHTML = '';
+  if (isPromptMode) return; // No pills for unlimited prompt mode
   for (let i = 0; i < TOTAL_QUESTIONS; i++) {
     const d = document.createElement('div');
     d.className = 'q-pill';
@@ -135,6 +147,11 @@ function buildPills() {
 }
 
 function updatePills() {
+  if (isPromptMode) {
+    document.getElementById('qNumDisplay').textContent = '∞';
+    document.getElementById('qTotalDisplay').textContent = '∞';
+    return;
+  }
   for (let i = 0; i < TOTAL_QUESTIONS; i++) {
     const pill = document.getElementById(`pill-${i}`);
     if (!pill) continue;
@@ -179,7 +196,7 @@ function loadQuestion() {
   isRunning   = false;
   testStarted = false;
   startTime   = null;
-  timeLeft    = TIME_PER_QUESTION;
+  timeLeft    = isPromptMode ? PROMPT_TIME : TIME_PER_QUESTION;
   weakTypingShown = false;
   promptComplete = false;
   promptHasError = false;
@@ -368,7 +385,6 @@ document.getElementById('hiddenInput').addEventListener('keydown', function(e) {
   const next = document.getElementById('c' + charIndex);
   if (next) {
     next.classList.add('current');
-    next.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
   highlightActiveWord(charIndex);
   updateStats();
@@ -501,14 +517,57 @@ function regenerateImage() {
 function downloadImage() {
   const img = document.getElementById('genImage');
   if (!img.src) return;
-  const a = document.createElement('a');
-  a.href = img.src;
-  a.download = 'typeblast-ai-image.png';
-  a.click();
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    const a = document.createElement('a');
+    a.href = canvas.toDataURL('image/png');
+    a.download = 'typeblast-ai-image.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch(e) {
+    // Fallback: open in new tab for manual save
+    window.open(img.src, '_blank');
+  }
+}
+
+function shareImage() {
+  const img = document.getElementById('genImage');
+  if (!img.src) return;
+  if (navigator.share) {
+    navigator.share({
+      title: 'TypeBlast AI Image',
+      text: `🎨 Check out this AI image I generated: "${lastPromptUsed}"`,
+      url: img.src
+    }).catch(() => {});
+  } else {
+    // Fallback: copy image URL to clipboard
+    navigator.clipboard.writeText(img.src).then(() => {
+      showWarning('✅ Image URL copied to clipboard!');
+    }).catch(() => {
+      window.open(img.src, '_blank');
+    });
+  }
+}
+
+function openFullscreen() {
+  const img = document.getElementById('genImage');
+  if (!img.src) return;
+  window.open(img.src, '_blank');
 }
 
 function closeImageGen() {
   document.getElementById('imageGenOverlay').style.display = 'none';
+  if (isPromptMode) {
+    // Unlimited prompt mode — just load a new prompt
+    loadQuestion();
+    focusInput();
+    return;
+  }
   if (sessionActive && currentQuestion + 1 < TOTAL_QUESTIONS) {
     currentQuestion++;
     loadQuestion();
@@ -516,6 +575,21 @@ function closeImageGen() {
   } else if (sessionActive) {
     showFinalResult();
   }
+}
+
+function goBackToPromptScreen() {
+  document.getElementById('imageGenOverlay').style.display = 'none';
+  // Reset state so user can retype the same prompt
+  charIndex = 0; errors = 0; totalTyped = 0;
+  isRunning = false; testStarted = false; startTime = null;
+  timeLeft = PROMPT_TIME; weakTypingShown = false;
+  promptComplete = false; promptHasError = false;
+  renderText(); updateStats(); updateTimerBar();
+  document.getElementById('hiddenInput').value = '';
+  document.getElementById('clickPrompt').classList.remove('hidden');
+  document.getElementById('promptCompleteOverlay').style.display = 'none';
+  document.getElementById('promptErrorOverlay').style.display = 'none';
+  focusInput();
 }
 
 // ===================== WEAK TYPING =====================
@@ -544,7 +618,7 @@ function retestCurrentQuestion() {
   hideTransition();
   charIndex = 0; errors = 0; totalTyped = 0;
   isRunning = false; testStarted = false; startTime = null;
-  timeLeft = TIME_PER_QUESTION; weakTypingShown = false;
+  timeLeft = isPromptMode ? PROMPT_TIME : TIME_PER_QUESTION; weakTypingShown = false;
   promptComplete = false; promptHasError = false;
   renderText(); updateStats(); updateTimerBar();
   document.getElementById('hiddenInput').value = '';
@@ -583,7 +657,7 @@ function recordQuestionResult(completed, skipped) {
 
 // ===================== NEXT QUESTION =====================
 function moveToNextQuestion(reason) {
-  if (currentQuestion + 1 >= TOTAL_QUESTIONS) { showFinalResult(); return; }
+  if (!isPromptMode && currentQuestion + 1 >= TOTAL_QUESTIONS) { showFinalResult(); return; }
   let countdown = 3;
   const overlay  = document.getElementById('transitionOverlay');
   const titleEl  = document.getElementById('transitionTitle');
@@ -670,7 +744,8 @@ function updateTimerDisplay() {
 }
 
 function updateTimerBar() {
-  const pct = (timeLeft / TIME_PER_QUESTION) * 100;
+  const maxTime = isPromptMode ? PROMPT_TIME : TIME_PER_QUESTION;
+  const pct = (timeLeft / maxTime) * 100;
   const bar = document.getElementById('timerBar');
   bar.style.width = pct + '%';
   if (pct < 25) bar.classList.add('warning');
@@ -714,10 +789,14 @@ document.addEventListener('keydown', e => {
 }, true);
 
 document.addEventListener('mousedown', e => {
+  // Prevent scroll jump on any click anywhere on the page
+  const scrollY = window.scrollY;
+  requestAnimationFrame(() => { window.scrollTo(0, scrollY); });
+
   if (!testStarted || !sessionActive) return;
   const testArea = document.getElementById('testArea');
   if (testArea && testArea.contains(e.target)) return;
-  const allowedSelectors = ['.btn','.level-btn','#resultModal','.result-card','#imageGenOverlay','.gen-new-btn','#promptCompleteOverlay','#promptErrorOverlay'];
+  const allowedSelectors = ['.btn','.level-btn','#resultModal','.result-card','#imageGenOverlay','.gen-new-btn','.gen-back-btn','#promptCompleteOverlay','#promptErrorOverlay'];
   for (const sel of allowedSelectors) { if (e.target.closest(sel)) return; }
   handleFocusLost();
 });
