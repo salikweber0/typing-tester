@@ -4,7 +4,77 @@
 <meta charset="UTF-8">
 <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'; default-src 'self' 'unsafe-inline'; connect-src *; img-src * data: blob:; font-src *; style-src * 'unsafe-inline';">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TypeBlast 🚀 — Typing Adventure</title>
+
+<!-- ═══════════════════ PRIMARY SEO ═══════════════════ -->
+<title>TypeBlast Pro ⌨️🚀 — Free Online Typing Speed Test | WPM & Accuracy</title>
+<meta name="description" content="TypeBlast Pro is a free, fun typing speed test with Hard, Super Pro, and AI Prompt Testing modes. Improve your WPM, accuracy & typing skills. Generate AI images from your prompts!">
+<meta name="keywords" content="typing test, typing speed test, WPM test, words per minute, typing practice, typing game, online typing test, improve typing speed, accuracy test, TypeBlast, keyboard test, touch typing, typing challenge, AI typing, prompt typing, free typing test">
+<meta name="author" content="TypeBlast Pro">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="theme-color" content="#a855f7">
+<meta name="application-name" content="TypeBlast Pro">
+<link rel="canonical" href="https://typeblastpro.app/">
+
+<!-- ═══════════════════ FAVICON / TAB ICON ═══════════════════ -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23a855f7'/><stop offset='100%25' style='stop-color:%23ff4d8d'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text y='.9em' font-size='72' text-anchor='middle' x='50' font-family='serif'>⌨️</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' style='stop-color:%23a855f7'/><stop offset='100%25' style='stop-color:%23ff4d8d'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23g)'/><text y='.9em' font-size='72' text-anchor='middle' x='50' font-family='serif'>⌨️</text></svg>">
+
+<!-- ═══════════════════ OPEN GRAPH (Facebook / WhatsApp / LinkedIn) ═══════════════════ -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://typeblastpro.app/">
+<meta property="og:title" content="TypeBlast Pro ⌨️🚀 — Free Typing Speed Test + AI Image Generator">
+<meta property="og:description" content="Test your typing speed & accuracy in Hard, Super Pro, and AI Prompt modes. Generate stunning AI images from your typed prompts. Play free now! 🔥">
+<meta property="og:image" content="https://typeblastpro.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TypeBlast Pro — Typing Speed Test with AI">
+<meta property="og:site_name" content="TypeBlast Pro">
+<meta property="og:locale" content="en_IN">
+
+<!-- ═══════════════════ TWITTER / X CARD ═══════════════════ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@typeblastpro">
+<meta name="twitter:creator" content="@typeblastpro">
+<meta name="twitter:title" content="TypeBlast Pro ⌨️🚀 — Free Typing Speed Test + AI Image Generator">
+<meta name="twitter:description" content="Improve your WPM with Hard & Super Pro modes. Type prompts and generate AI images! Free, fun, fast. 🔥">
+<meta name="twitter:image" content="https://typeblastpro.app/og-image.png">
+<meta name="twitter:image:alt" content="TypeBlast Pro Preview">
+
+<!-- ═══════════════════ STRUCTURED DATA (Google Rich Results) ═══════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "TypeBlast Pro",
+  "url": "https://typeblastpro.app/",
+  "description": "Free online typing speed test with Hard, Super Pro, and AI Prompt Testing modes. Measure your WPM and accuracy, and generate AI images from prompts.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript",
+  "inLanguage": ["en", "hi"],
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Typing speed test (WPM)",
+    "Accuracy measurement",
+    "Hard mode typing challenge",
+    "Super Pro typing mode",
+    "AI Prompt Testing mode",
+    "AI image generation from prompts",
+    "Secure test mode with anti-cheat",
+    "Session results and grade report"
+  ],
+  "screenshot": "https://og-image-service.vercel.app/api/og?title=TypeBlast%20Pro",
+  "creator": {
+    "@type": "Organization",
+    "name": "TypeBlast Pro"
+  }
+}
+</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -77,8 +147,11 @@
     <img id="genImage" src="" alt="AI Generated" crossorigin="anonymous">
   </div>
   <div class="gen-action-row" id="genActionRow" style="display:none;">
+    <button class="gen-back-btn" id="genBackBtn" onclick="goBackToPromptScreen()">🔙 Back</button>
     <button class="gen-new-btn" id="genNewBtn" onclick="closeImageGen()">🔄 New Prompt</button>
     <button class="gen-dl-btn" id="genDlBtn" onclick="downloadImage()">⬇️ Download</button>
+    <button class="gen-share-btn" id="genShareBtn" onclick="shareImage()">🔗 Share</button>
+    <button class="gen-fs-btn" id="genFsBtn" onclick="openFullscreen()">⛶ Full Screen</button>
     <button class="gen-new-btn" onclick="regenerateImage()" style="background:rgba(251,191,36,0.1);border-color:var(--yellow);color:var(--yellow);">🔀 Regenerate</button>
   </div>
 </div>
