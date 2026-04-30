@@ -51,31 +51,31 @@ const paragraphs = {
     "Lexicographic morphosyntactic transformations in agglutinative Turkic language families demonstrate productive derivational affixation patterns fundamentally distinguishing their grammatical typology from fusional Indo-European inflectional paradigms.",
   ],
   prompt: [
-    "A majestic dragon soaring through a neon-lit cyberpunk city at midnight, with glowing wings and electric lightning crackling around its scales.",
-    "An enchanted forest at twilight where every tree glows from within, giant luminous mushrooms tower overhead, and tiny fairies dance between the roots.",
-    "A futuristic astronaut floating in deep space, surrounded by colorful nebulae and shattered asteroids, Earth glowing blue in the far distance.",
-    "A cozy Japanese ramen shop on a rainy evening, warm amber light spilling onto wet cobblestones, steam curling from bowls in the window.",
-    "An underwater palace built from coral and obsidian, glowing jellyfish drifting through grand archways, a mermaid queen seated on a throne of pearls.",
-    "A giant robot covered in vines and wildflowers standing peacefully in a sunflower field at golden hour, sparrows nesting in its open hands.",
-    "A magical library where books orbit in slow spirals around a central glowing orb, ancient staircases vanish into clouds far above.",
-    "A lone samurai standing on a cliff at dawn, petals of cherry blossom swirling in slow motion, mist filling the valley far below.",
-    "A secret crystal cave beneath arctic ice, every surface refracting rainbow light, a polar fox sitting at the entrance.",
-    "A steampunk airship sailing above a Victorian city at sunset, brass propellers spinning, the crew watching fireworks burst below.",
-    "A wolf with a coat made of galaxies and stars howling at a massive aurora-lit moon over a frozen tundra lake.",
-    "A friendly alien spacecraft landing softly in a lavender field, curious deer approaching while glowing orbs drift out of the hatchway.",
-    "A phoenix made entirely of living fire and molten gold rising above the ruins of an ancient Egyptian temple at dusk.",
-    "A tiny village of mushroom houses hidden inside a giant hollow baobab tree, lit by warm lanterns, rope bridges connecting each level.",
-    "A time-traveling locomotive bursting through a swirling wormhole, passengers peering out windows at flashing scenes of different historical eras.",
-    "A vast floating island with waterfalls pouring off its edges into the clouds below, ancient ruins and a single glowing lighthouse on top.",
-    "A fox wearing a scholars robe reading a glowing book in a moonlit autumn library, stacks of ancient tomes reaching the ceiling.",
-    "An octopus DJ performing at an underwater rave, bioluminescent fish dancing in beams of colored light, coral speakers pulsing with bass.",
-    "A snow leopard leaping across mountain peaks in a blizzard, its fur shimmering with embedded constellations, northern lights blazing overhead.",
-    "A medieval blacksmith shop run entirely by friendly dragons, one breathing fire into the forge while another hammers a glowing sword.",
-    "A serene zen garden floating in the sky above the clouds, a monk meditating at its center, koi fish swimming through the air.",
-    "A city built entirely on the back of a colossal sleeping giant, streets winding between fingers, towers rising from the knuckles.",
-    "A child discovering a tiny glowing door at the base of an old oak tree, golden light pouring out, a world of wonder beyond.",
-    "A pirate ship made of glass sailing through a sea of stars in deep space, the crew navigating by the light of distant galaxies.",
-    "A rainforest waterfall flowing upward into the sky, exotic birds flying through the reversed cascade, butterflies resting on floating water drops.",
+    "Chubby giant panda with black eye patches in a golden dragon warrior robe, performing an epic spinning kick in an ancient Chinese temple, sparks and autumn leaves flying, cinematic 3D cartoon style.",
+    "Ancient wise tortoise with long white beard in purple monk robes, meditating peacefully under a glowing magical peach tree on a misty mountain cliff, orange fireflies floating around him, serene 3D animation.",
+    "Small elderly red panda master with white face markings in dark robes, fierce battle stance on a red wooden bridge at sunset, cherry blossoms swirling dramatically, detailed animated warrior scene.",
+    "Muscular snow leopard with dark spots and burning amber eyes, leaping across rooftops in a heavy blizzard, lightning cracking the dark sky, intense dramatic 3D cartoon action scene.",
+    "Big round blue cat with large green eyes and red bow tie, stirring a giant pot of spaghetti, three tiny mischievous cockroaches sneaking behind him on the kitchen counter, funny vibrant cartoon.",
+    "Three tiny grinning cockroaches — one red fat, one tall grey, one small green — surfing on a giant pizza slice through a living room, a big blue cat chasing them with a broom, chaotic cartoon.",
+    "Round blue robotic cat with no ears and big white belly, pulling a glowing futuristic gadget from his belly pocket, sparkling light beams shooting out, a small boy watching in amazement, cheerful anime.",
+    "Round blue robotic cat with no ears and a small dark-haired Japanese boy, both flying above rooftops on tiny bamboo propeller beanies, warm golden sunset sky, colorful classic anime style.",
+    "Chubby small Japanese boy with big dark eyes in white underwear, doing a ridiculous butt-shaking elephant pose in a grocery store, mother chasing him, bystanders laughing, bold colorful cartoon.",
+    "Grey cartoon cat frantically chasing a tiny grinning brown mouse through a 5-star restaurant kitchen, huge cakes toppling, pots of soup flying everywhere, classic slapstick 2D animation style.",
+    "Rectangular yellow sea sponge with big blue eyes and brown pants, and a chubby pink starfish, blowing giant rainbow bubbles in a sunny underwater flower field, joyful vibrant cartoon scene.",
+    "Teenage boy with blond spiky hair and whisker cheek marks in an orange ninja suit, running at superhuman speed through a dark forest, swirling golden energy flames surrounding him, dramatic anime.",
+    "Small round yellow electric mouse with black-tipped rabbit ears and red cheeks, sitting on a boy's shoulder on a sunlit hilltop, colorful fantasy creatures gathered around, beautiful anime sunrise.",
+    "Short muscular Indian boy in red dhoti eating glowing golden sweets, transforming with golden aura around his arms, then shattering a massive boulder with one punch, vibrant Indian cartoon style.",
+    "Short muscular Indian boy on a decorated elephant leading friends through colorful festive Indian kingdom streets, flowers and banners everywhere, joyful crowd, bright detailed Indian cartoon art.",
+    "Very fat man in yellow shirt and a tall thin man in a flat cap, both speeding on a tiny scooter through cartoon Indian streets, samosas flying, villain chasing them, bold funny Indian cartoon.",
+    "Three kindergarten girls with huge round eyes — one red-haired in orange, one black-haired in green, one blonde in blue — flying in V-formation over a cartoon city at sunset, colorful energy trails.",
+    "Large brown Great Dane dog with black spots and a tall lanky teenager in orange turtleneck, both holding flashlights inside a dark spooky haunted mansion with glowing portraits, colorful cartoon style.",
+    "Small chubby blue robot with a big round head, bright blue eyes and soft round body, waving cheerfully in a futuristic colorful city street, flying cars zooming overhead, vibrant cute cartoon scene.",
+    "Brave young boy in green tunic and pointed hat, holding a glowing magical sword and shield, standing at the entrance of a dark enchanted forest, fireflies lighting his path, colorful adventure art.",
+    "Tiny fairy girl with rainbow wings and sparkling pink dress, riding a giant friendly bumblebee through a magical flower garden, dewdrops shimmering like diamonds, enchanting colorful cartoon style.",
+    "Young girl with long silver hair in a flowing blue dress, standing on a misty bridge over a crystal river, colorful spirit creatures floating around her, magical glowing atmosphere, anime illustration.",
+    "Cheerful orange cartoon tiger cub with black stripes bouncing excitedly through a jungle, colorful exotic birds and butterflies all around, bright sunlight streaming through giant tropical leaves.",
+    "Wise old elephant with kind eyes and golden crown, sitting peacefully under a giant banyan tree surrounded by young animals listening to him, warm golden afternoon light, vibrant Indian cartoon art.",
+    "Tiny brave mouse in a red cape and silver thimble helmet, sword-fighting a large menacing cockroach on a kitchen countertop, dramatic lighting, colorful storybook cartoon illustration style.",
   ]
 };
 
@@ -457,8 +457,14 @@ function showImageGenOverlay(prompt) {
 // ── MAIN IMAGE GENERATION: Pollinations AI (free, no CORS, no API key) ──
 function generateImage(prompt, isRetry) {
   const seed = Math.floor(Math.random() * 999999);
-  const model = isRetry ? 'flux' : 'turbo';
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${model}&seed=${seed}&width=1024&height=1024&nologo=true`;
+  // Always use flux — it's the best quality model on Pollinations
+  const model = 'flux';
+  // Quality booster suffix appended to every prompt
+  const qualitySuffix = ', 4K ultra HD, highly detailed, vibrant colors, sharp focus, professional digital art, award-winning illustration, masterpiece quality, perfect anatomy';
+  const enhancedPrompt = prompt + qualitySuffix;
+  // Negative prompt: things we do NOT want in the image
+  const negativePrompt = 'blurry, low quality, deformed, ugly, bad anatomy, extra limbs, missing limbs, distorted face, watermark, text, signature, poorly drawn, amateur, grainy, overexposed, underexposed, duplicate, mutated';
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?model=${model}&seed=${seed}&width=1024&height=1024&nologo=true&enhance=true&negative=${encodeURIComponent(negativePrompt)}`;
 
   document.getElementById('genModelBadge').textContent = `🎨 AI (${model})`;
 
@@ -790,8 +796,9 @@ document.addEventListener('keydown', e => {
 
 document.addEventListener('mousedown', e => {
   // Prevent scroll jump on any click anywhere on the page
-  const scrollY = window.scrollY;
-  requestAnimationFrame(() => { window.scrollTo(0, scrollY); });
+  const scrollX = window.scrollX, scrollY = window.scrollY;
+  Promise.resolve().then(() => window.scrollTo(scrollX, scrollY));
+  requestAnimationFrame(() => window.scrollTo(scrollX, scrollY));
 
   if (!testStarted || !sessionActive) return;
   const testArea = document.getElementById('testArea');
@@ -884,3 +891,25 @@ function createParticles() {
 createParticles();
 startNewSession();
 document.getElementById('testArea').addEventListener('click', focusInput);
+// ===================== AUTO-SCROLL FIX =====================
+// Prevent the hidden input focus from jumping the page scroll position
+(function() {
+  const hiddenInput = document.getElementById('hiddenInput');
+  if (!hiddenInput) return;
+
+  // Override focus to preserve scroll position
+  const origFocus = hiddenInput.focus.bind(hiddenInput);
+  hiddenInput.focus = function() {
+    const sx = window.scrollX, sy = window.scrollY;
+    origFocus();
+    window.scrollTo(sx, sy);
+  };
+
+  // Also block any scroll caused by the hidden input receiving focus via click
+  hiddenInput.addEventListener('focus', function() {
+    // Double-lock: restore after microtask and after next frame
+    const sx = window.scrollX, sy = window.scrollY;
+    Promise.resolve().then(() => window.scrollTo(sx, sy));
+    requestAnimationFrame(() => window.scrollTo(sx, sy));
+  });
+})();
