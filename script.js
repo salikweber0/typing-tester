@@ -51,31 +51,26 @@ const paragraphs = {
     "Lexicographic morphosyntactic transformations in agglutinative Turkic language families demonstrate productive derivational affixation patterns fundamentally distinguishing their grammatical typology from fusional Indo-European inflectional paradigms.",
   ],
   prompt: [
-    "Chubby giant panda with black eye patches in a golden dragon warrior robe, performing an epic spinning kick in an ancient Chinese temple, sparks and autumn leaves flying, cinematic 3D cartoon style.",
-    "Ancient wise tortoise with long white beard in purple monk robes, meditating peacefully under a glowing magical peach tree on a misty mountain cliff, orange fireflies floating around him, serene 3D animation.",
-    "Small elderly red panda master with white face markings in dark robes, fierce battle stance on a red wooden bridge at sunset, cherry blossoms swirling dramatically, detailed animated warrior scene.",
-    "Muscular snow leopard with dark spots and burning amber eyes, leaping across rooftops in a heavy blizzard, lightning cracking the dark sky, intense dramatic 3D cartoon action scene.",
-    "Big round blue cat with large green eyes and red bow tie, stirring a giant pot of spaghetti, three tiny mischievous cockroaches sneaking behind him on the kitchen counter, funny vibrant cartoon.",
-    "Three tiny grinning cockroaches — one red fat, one tall grey, one small green — surfing on a giant pizza slice through a living room, a big blue cat chasing them with a broom, chaotic cartoon.",
+    "Chubby golden lion with a bright red mane wearing a tiny chef hat, flipping giant pancakes in a sunny kitchen, batter flying everywhere, a small fox watching hungrily from the doorway, vibrant funny cartoon.",
+    "Tiny old tortoise with round glasses and a purple scarf, riding a giant friendly snail through a colorful mushroom forest, glowing lanterns hanging from trees, magical soft lighting, cute 3D animation.",
+    "Big fluffy white polar bear in a yellow raincoat, splashing happily through rainbow puddles in a cartoon city street, small birds sitting on his head, cheerful bright colors, joyful children cartoon.",
+    "Clever brown monkey with big curious eyes in a red inventor coat, surrounded by wild spinning gears and bubbling potions in a chaotic magical workshop, sparks flying, colorful fun cartoon scene.",
     "Round blue robotic cat with no ears and big white belly, pulling a glowing futuristic gadget from his belly pocket, sparkling light beams shooting out, a small boy watching in amazement, cheerful anime.",
-    "Round blue robotic cat with no ears and a small dark-haired Japanese boy, both flying above rooftops on tiny bamboo propeller beanies, warm golden sunset sky, colorful classic anime style.",
-    "Chubby small Japanese boy with big dark eyes in white underwear, doing a ridiculous butt-shaking elephant pose in a grocery store, mother chasing him, bystanders laughing, bold colorful cartoon.",
-    "Grey cartoon cat frantically chasing a tiny grinning brown mouse through a 5-star restaurant kitchen, huge cakes toppling, pots of soup flying everywhere, classic slapstick 2D animation style.",
-    "Rectangular yellow sea sponge with big blue eyes and brown pants, and a chubby pink starfish, blowing giant rainbow bubbles in a sunny underwater flower field, joyful vibrant cartoon scene.",
-    "Teenage boy with blond spiky hair and whisker cheek marks in an orange ninja suit, running at superhuman speed through a dark forest, swirling golden energy flames surrounding him, dramatic anime.",
-    "Small round yellow electric mouse with black-tipped rabbit ears and red cheeks, sitting on a boy's shoulder on a sunlit hilltop, colorful fantasy creatures gathered around, beautiful anime sunrise.",
     "Short muscular Indian boy in red dhoti eating glowing golden sweets, transforming with golden aura around his arms, then shattering a massive boulder with one punch, vibrant Indian cartoon style.",
-    "Short muscular Indian boy on a decorated elephant leading friends through colorful festive Indian kingdom streets, flowers and banners everywhere, joyful crowd, bright detailed Indian cartoon art.",
-    "Very fat man in yellow shirt and a tall thin man in a flat cap, both speeding on a tiny scooter through cartoon Indian streets, samosas flying, villain chasing them, bold funny Indian cartoon.",
-    "Three kindergarten girls with huge round eyes — one red-haired in orange, one black-haired in green, one blonde in blue — flying in V-formation over a cartoon city at sunset, colorful energy trails.",
-    "Large brown Great Dane dog with black spots and a tall lanky teenager in orange turtleneck, both holding flashlights inside a dark spooky haunted mansion with glowing portraits, colorful cartoon style.",
-    "Small chubby blue robot with a big round head, bright blue eyes and soft round body, waving cheerfully in a futuristic colorful city street, flying cars zooming overhead, vibrant cute cartoon scene.",
-    "Brave young boy in green tunic and pointed hat, holding a glowing magical sword and shield, standing at the entrance of a dark enchanted forest, fireflies lighting his path, colorful adventure art.",
-    "Tiny fairy girl with rainbow wings and sparkling pink dress, riding a giant friendly bumblebee through a magical flower garden, dewdrops shimmering like diamonds, enchanting colorful cartoon style.",
-    "Young girl with long silver hair in a flowing blue dress, standing on a misty bridge over a crystal river, colorful spirit creatures floating around her, magical glowing atmosphere, anime illustration.",
     "Cheerful orange cartoon tiger cub with black stripes bouncing excitedly through a jungle, colorful exotic birds and butterflies all around, bright sunlight streaming through giant tropical leaves.",
+    "Small chubby blue robot with a big round head, bright blue eyes and soft round body, waving cheerfully in a futuristic colorful city street, flying cars zooming overhead, vibrant cute cartoon scene.",
+    "Grey cartoon cat frantically chasing a tiny grinning brown mouse through a fancy restaurant kitchen, huge cakes toppling, pots of soup flying everywhere, classic slapstick 2D animation style.",
+    "Brave young boy in green tunic and pointed hat, holding a glowing magical sword and shield, standing at the entrance of a dark enchanted forest, fireflies lighting his path, colorful adventure art.",
+    "Three tiny grinning cockroaches, one red and fat, one tall and grey, one small and green, all surfing on a giant pizza slice through a living room, a big blue cat chasing them with a broom, chaotic cartoon.",
+    "Teenage boy with blond spiky hair and whisker cheek marks in an orange ninja suit, running at superhuman speed through a dark forest, swirling golden energy flames surrounding him, dramatic anime.",
     "Wise old elephant with kind eyes and golden crown, sitting peacefully under a giant banyan tree surrounded by young animals listening to him, warm golden afternoon light, vibrant Indian cartoon art.",
+    "Very fat jolly man in yellow shirt and a tall thin man in a flat cap, both speeding on a tiny scooter through cartoon Indian streets, samosas flying around them, bold funny colorful Indian cartoon.",
+    "Small round yellow electric mouse with black-tipped rabbit ears and red cheeks, sitting on a boy's shoulder on a sunlit hilltop, colorful fantasy creatures gathered around, beautiful anime sunrise.",
     "Tiny brave mouse in a red cape and silver thimble helmet, sword-fighting a large menacing cockroach on a kitchen countertop, dramatic lighting, colorful storybook cartoon illustration style.",
+    "Young girl with long silver hair in a flowing blue dress, standing on a misty bridge over a crystal river, colorful spirit creatures floating around her, magical glowing atmosphere, anime illustration.",
+    "Large brown Great Dane dog with black spots and a tall lanky teenager in an orange turtleneck, both holding flashlights inside a dark spooky haunted mansion with glowing portraits, colorful cartoon.",
+    "Short muscular Indian boy on a decorated elephant leading friends through colorful festive Indian kingdom streets, flowers and banners everywhere, joyful crowd, bright detailed Indian cartoon art.",
+    "Tiny fairy girl with rainbow wings and sparkling pink dress, riding a giant friendly bumblebee through a magical flower garden, dewdrops shimmering like diamonds, enchanting colorful cartoon style.",
   ]
 };
 
@@ -451,62 +446,77 @@ function showImageGenOverlay(prompt) {
   document.getElementById('genImageContainer').style.display = 'none';
   document.getElementById('genActionRow').style.display = 'none';
 
-  generateImage(prompt, false);
+  generateImage(prompt, 0);
 }
 
 // ── MAIN IMAGE GENERATION: Pollinations AI (free, no CORS, no API key) ──
-function generateImage(prompt, isRetry) {
-  const seed = Math.floor(Math.random() * 999999);
-  // Always use flux — it's the best quality model on Pollinations
-  const model = 'flux';
-  // Quality booster suffix appended to every prompt
-  const qualitySuffix = ', 4K ultra HD, highly detailed, vibrant colors, sharp focus, professional digital art, award-winning illustration, masterpiece quality, perfect anatomy';
-  const enhancedPrompt = prompt + qualitySuffix;
-  // Negative prompt: things we do NOT want in the image
-  const negativePrompt = 'blurry, low quality, deformed, ugly, bad anatomy, extra limbs, missing limbs, distorted face, watermark, text, signature, poorly drawn, amateur, grainy, overexposed, underexposed, duplicate, mutated';
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?model=${model}&seed=${seed}&width=1024&height=1024&nologo=true&enhance=true&negative=${encodeURIComponent(negativePrompt)}`;
+function generateImage(prompt, retryCount) {
+  retryCount = retryCount || 0;
+  var seed = Math.floor(Math.random() * 999999);
+  var model = 'flux';
+  var qualitySuffix = ', 4K ultra HD, highly detailed, vibrant colors, sharp focus, professional digital art, award-winning illustration, masterpiece quality';
+  var enhancedPrompt = prompt + qualitySuffix;
+  var negativePrompt = 'blurry, low quality, deformed, ugly, bad anatomy, extra limbs, watermark, text, signature, poorly drawn, grainy';
+  var url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(enhancedPrompt) + '?model=' + model + '&seed=' + seed + '&width=1024&height=1024&nologo=true&enhance=true&negative=' + encodeURIComponent(negativePrompt);
 
-  document.getElementById('genModelBadge').textContent = `🎨 AI (${model})`;
+  document.getElementById('genModelBadge').textContent = '🎨 AI (' + model + ')';
 
   // Animated status dots
-  let dots = 1;
-  const dotTimer = setInterval(() => {
+  var dots = 1;
+  var dotTimer = setInterval(function() {
     dots = (dots % 3) + 1;
-    const el = document.getElementById('genStatus');
+    var el = document.getElementById('genStatus');
     if (el) el.textContent = 'GENERATING IMAGE' + '.'.repeat(dots);
   }, 600);
 
-  const loader = new Image();
-  loader.crossOrigin = 'anonymous';
-
-  loader.onload = () => {
+  function onSuccess(src) {
     clearInterval(dotTimer);
-    const imgEl = document.getElementById('genImage');
-    imgEl.src = loader.src;
-    document.getElementById('genModelBadge').textContent = `🎨 AI Image ✅`;
+    var imgEl = document.getElementById('genImage');
+    imgEl.src = src;
+    document.getElementById('genModelBadge').textContent = '🎨 AI Image ✅';
     document.getElementById('genLoader').style.display = 'none';
     document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
     document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
     document.getElementById('genImageContainer').style.display = 'block';
     document.getElementById('genActionRow').style.display = 'flex';
-    document.querySelectorAll('.gen-new-btn').forEach(btn => btn.style.display = '');
+    document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
     recordQuestionResult(true, false);
-  };
+  }
 
-  loader.onerror = () => {
+  function onFail() {
     clearInterval(dotTimer);
-    if (!isRetry) {
-      document.getElementById('genStatus').textContent = '🔄 Retrying...';
-      generateImage(prompt, true);
+    if (retryCount < 3) {
+      var msgs = ['🔄 Retrying...', '🔄 Trying again...', '🔄 One more try...'];
+      document.getElementById('genStatus').textContent = msgs[retryCount] || '🔄 Retrying...';
+      setTimeout(function() { generateImage(prompt, retryCount + 1); }, 2000);
     } else {
       document.getElementById('genLoader').style.display = 'none';
       document.getElementById('genStatus').textContent = '❌ Generation failed — try again';
       document.getElementById('genTitle').textContent = '😔 Kuch galat hua';
       document.getElementById('genActionRow').style.display = 'flex';
-      document.querySelectorAll('.gen-new-btn').forEach(btn => btn.style.display = '');
+      document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
     }
+  }
+
+  var loader = new Image();
+  // 90 second timeout — Pollinations can be slow on first request
+  var imgTimeout = setTimeout(function() {
+    loader.onload = null;
+    loader.onerror = null;
+    loader.src = '';
+    onFail();
+  }, 90000);
+
+  loader.onload = function() {
+    clearTimeout(imgTimeout);
+    onSuccess(loader.src);
+  };
+  loader.onerror = function() {
+    clearTimeout(imgTimeout);
+    onFail();
   };
 
+  // Direct img tag load — works without CORS issues for display
   loader.src = url;
 }
 
@@ -517,7 +527,7 @@ function regenerateImage() {
   document.getElementById('genTitle').textContent = '🎨 Creating Your Image...';
   document.getElementById('genStatus').textContent = 'GEMINI GENERATING IMAGE...';
   document.getElementById('genModelBadge').textContent = '🤖 Gemini AI';
-  generateImage(lastPromptUsed, false);
+  generateImage(lastPromptUsed, 0);
 }
 
 function downloadImage() {
