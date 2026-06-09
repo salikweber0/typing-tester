@@ -1,6 +1,7 @@
 // ===================== IMAGE GENERATION CONFIG =====================
 // Pollinations AI — free, no API key, works from browser directly
 let lastPromptUsed = '';
+let lastGeneratedBlob = null;
 
 function selectStyle(card) {
   document.querySelectorAll('.model-card').forEach(c => c.classList.remove('selected'));
@@ -449,75 +450,96 @@ function showImageGenOverlay(prompt) {
   generateImage(prompt, 0);
 }
 
-// ── MAIN IMAGE GENERATION: Pollinations AI (free, no CORS, no API key) ──
+// ── MAIN IMAGE GENERATION: Pollinations AI ──
+// crossOrigin REMOVED from img tag in HTML — that was the #1 failure cause.
+// Strategy: fetch() with 120s timeout → blob URL (best, no CORS issues)
+//           fallback → direct img.src without crossOrigin (works for display, not download)
+//           3 retries with fresh seeds on any failure
+
 function generateImage(prompt, retryCount) {
   retryCount = retryCount || 0;
   var seed = Math.floor(Math.random() * 999999);
-  var model = 'flux';
-  var qualitySuffix = ', 4K ultra HD, highly detailed, vibrant colors, sharp focus, professional digital art, award-winning illustration, masterpiece quality';
-  var enhancedPrompt = prompt + qualitySuffix;
-  var negativePrompt = 'blurry, low quality, deformed, ugly, bad anatomy, extra limbs, watermark, text, signature, poorly drawn, grainy';
-  var url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(enhancedPrompt) + '?model=' + model + '&seed=' + seed + '&width=1024&height=1024&nologo=true&enhance=true&negative=' + encodeURIComponent(negativePrompt);
+  var enhancedPrompt = prompt + ', highly detailed, vibrant colors, sharp focus, professional digital art, masterpiece quality';
+  var negativePrompt = 'blurry, low quality, deformed, ugly, watermark, text, poorly drawn, grainy';
+  var baseUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(enhancedPrompt)
+    + '?model=flux&seed=' + seed + '&width=1024&height=1024&nologo=true&enhance=true'
+    + '&negative=' + encodeURIComponent(negativePrompt);
 
-  document.getElementById('genModelBadge').textContent = '🎨 AI (' + model + ')';
+  document.getElementById('genModelBadge').textContent = '🎨 AI (flux)';
 
-  // Animated status dots
   var dots = 1;
   var dotTimer = setInterval(function() {
     dots = (dots % 3) + 1;
     var el = document.getElementById('genStatus');
     if (el) el.textContent = 'GENERATING IMAGE' + '.'.repeat(dots);
-  }, 600);
+  }, 700);
 
   function onSuccess(src) {
     clearInterval(dotTimer);
     var imgEl = document.getElementById('genImage');
+    imgEl.onload = function() {
+      document.getElementById('genLoader').style.display = 'none';
+      document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
+      document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
+      document.getElementById('genModelBadge').textContent = '🎨 AI Image ✅';
+      document.getElementById('genImageContainer').style.display = 'block';
+      document.getElementById('genActionRow').style.display = 'flex';
+      document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
+      recordQuestionResult(true, false);
+    };
+    imgEl.onerror = function() { onFail(); };
     imgEl.src = src;
-    document.getElementById('genModelBadge').textContent = '🎨 AI Image ✅';
-    document.getElementById('genLoader').style.display = 'none';
-    document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
-    document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
-    document.getElementById('genImageContainer').style.display = 'block';
-    document.getElementById('genActionRow').style.display = 'flex';
-    document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
-    recordQuestionResult(true, false);
   }
 
   function onFail() {
     clearInterval(dotTimer);
     if (retryCount < 3) {
-      var msgs = ['🔄 Retrying...', '🔄 Trying again...', '🔄 One more try...'];
-      document.getElementById('genStatus').textContent = msgs[retryCount] || '🔄 Retrying...';
-      setTimeout(function() { generateImage(prompt, retryCount + 1); }, 2000);
+      var retryMsgs = ['🔄 Server busy, retrying...', '🔄 Trying again...', '🔄 Last attempt...'];
+      var el = document.getElementById('genStatus');
+      if (el) el.textContent = retryMsgs[retryCount];
+      setTimeout(function() { generateImage(prompt, retryCount + 1); }, 3000);
     } else {
       document.getElementById('genLoader').style.display = 'none';
-      document.getElementById('genStatus').textContent = '❌ Generation failed — try again';
+      document.getElementById('genStatus').textContent = '❌ Generation failed — tap Regenerate';
       document.getElementById('genTitle').textContent = '😔 Kuch galat hua';
       document.getElementById('genActionRow').style.display = 'flex';
       document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
     }
   }
 
-  var loader = new Image();
-  // 90 second timeout — Pollinations can be slow on first request
-  var imgTimeout = setTimeout(function() {
-    loader.onload = null;
-    loader.onerror = null;
-    loader.src = '';
-    onFail();
-  }, 90000);
+  // PRIMARY: fetch() gives us a blob URL — no CORS enforcement for display,
+  // works even when server is slow, proper 120s timeout control
+  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  var fetchTimeout = setTimeout(function() {
+    if (controller) controller.abort();
+  }, 120000); // 2 minutes — Pollinations flux can be slow
 
-  loader.onload = function() {
-    clearTimeout(imgTimeout);
-    onSuccess(loader.src);
-  };
-  loader.onerror = function() {
-    clearTimeout(imgTimeout);
-    onFail();
-  };
+  var fetchOptions = controller ? { signal: controller.signal } : {};
 
-  // Direct img tag load — works without CORS issues for display
-  loader.src = url;
+  fetch(baseUrl, fetchOptions)
+    .then(function(resp) {
+      clearTimeout(fetchTimeout);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.blob();
+    })
+    .then(function(blob) {
+      var blobUrl = URL.createObjectURL(blob);
+      lastGeneratedBlob = blob; // save for download
+      onSuccess(blobUrl);
+    })
+    .catch(function(err) {
+      clearTimeout(fetchTimeout);
+      // FALLBACK: direct img src (no crossOrigin, so CORS not enforced by browser)
+      // This works for display but blob won't be available for canvas download
+      var img = new Image();
+      var imgTimer = setTimeout(function() {
+        img.onload = null; img.onerror = null; img.src = '';
+        onFail();
+      }, 120000);
+      img.onload = function() { clearTimeout(imgTimer); lastGeneratedBlob = null; onSuccess(img.src); };
+      img.onerror = function() { clearTimeout(imgTimer); onFail(); };
+      img.src = baseUrl;
+    });
 }
 
 function regenerateImage() {
@@ -533,22 +555,18 @@ function regenerateImage() {
 function downloadImage() {
   const img = document.getElementById('genImage');
   if (!img.src) return;
-  try {
-    const canvas = document.createElement('canvas');
-    canvas.width = img.naturalWidth || img.width;
-    canvas.height = img.naturalHeight || img.height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
+  // If we have a blob from fetch, use it directly — no canvas/CORS issues
+  if (lastGeneratedBlob) {
     const a = document.createElement('a');
-    a.href = canvas.toDataURL('image/png');
+    a.href = URL.createObjectURL(lastGeneratedBlob);
     a.download = 'typeblast-ai-image.png';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-  } catch(e) {
-    // Fallback: open in new tab for manual save
-    window.open(img.src, '_blank');
+    return;
   }
+  // Fallback: open in new tab for manual save
+  window.open(img.src, '_blank');
 }
 
 function shareImage() {
