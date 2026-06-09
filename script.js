@@ -443,10 +443,11 @@ function showImageGenOverlay(prompt) {
   document.getElementById('genTitle').textContent = '🎨 Creating Your Image...';
   document.getElementById('genPromptDisplay').innerHTML = `<span>Your Prompt:</span><br><br>"${prompt}"`;
   document.getElementById('genLoader').style.display = 'flex';
-  document.getElementById('genStatus').textContent = 'GEMINI GENERATING IMAGE...';
+  document.getElementById('genStatus').textContent = '⏳ Generating... please wait';
   document.getElementById('genImageContainer').style.display = 'none';
   document.getElementById('genActionRow').style.display = 'none';
 
+  _genActive = false;
   generateImage(prompt, 0);
 }
 
@@ -456,117 +457,128 @@ function showImageGenOverlay(prompt) {
 //           fallback → direct img.src without crossOrigin (works for display, not download)
 //           3 retries with fresh seeds on any failure
 
+// ── IMAGE GENERATION: Pollinations AI ──
+// Simple & reliable: pure img.src, no fetch, no crossOrigin, no CORS issues.
+// Pollinations is free, no API key needed, works from any browser.
+// We load image into a hidden Image() object first, then show it on success.
+
+var _genActive = false; // prevent duplicate calls
+
 function generateImage(prompt, retryCount) {
   retryCount = retryCount || 0;
+
+  // Cancel any previous attempt
+  _genActive = true;
+
   var seed = Math.floor(Math.random() * 999999);
-  var enhancedPrompt = prompt + ', highly detailed, vibrant colors, sharp focus, professional digital art, masterpiece quality';
-  var negativePrompt = 'blurry, low quality, deformed, ugly, watermark, text, poorly drawn, grainy';
-  var baseUrl = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(enhancedPrompt)
-    + '?model=flux&seed=' + seed + '&width=1024&height=1024&nologo=true&enhance=true'
-    + '&negative=' + encodeURIComponent(negativePrompt);
 
-  document.getElementById('genModelBadge').textContent = '🎨 AI (flux)';
+  // Keep URL clean — no excessive params that might cause 400 errors
+  var fullPrompt = encodeURIComponent(prompt + ', vibrant colors, highly detailed, sharp focus, professional digital art');
+  var url = 'https://image.pollinations.ai/prompt/' + fullPrompt
+    + '?model=flux&seed=' + seed
+    + '&width=1024&height=1024'
+    + '&nologo=true'
+    + '&safe=false';
 
-  var dots = 1;
+  document.getElementById('genModelBadge').textContent = '🎨 Flux AI';
+
+  // Animated dots
+  var dotCount = 1;
   var dotTimer = setInterval(function() {
-    dots = (dots % 3) + 1;
+    dotCount = (dotCount % 3) + 1;
     var el = document.getElementById('genStatus');
-    if (el) el.textContent = 'GENERATING IMAGE' + '.'.repeat(dots);
+    if (el) el.textContent = 'GENERATING IMAGE' + '.'.repeat(dotCount);
   }, 700);
 
-  function onSuccess(src) {
+  // Timeout: 3 minutes max (Pollinations can be slow under load)
+  var timeoutMs = 180000;
+  var loader = new Image();
+  var timer = null;
+
+  function cleanup() {
     clearInterval(dotTimer);
-    var imgEl = document.getElementById('genImage');
-    imgEl.onload = function() {
-      document.getElementById('genLoader').style.display = 'none';
-      document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
-      document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
-      document.getElementById('genModelBadge').textContent = '🎨 AI Image ✅';
-      document.getElementById('genImageContainer').style.display = 'block';
-      document.getElementById('genActionRow').style.display = 'flex';
-      document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
-      recordQuestionResult(true, false);
-    };
-    imgEl.onerror = function() { onFail(); };
-    imgEl.src = src;
+    clearTimeout(timer);
+    loader.onload = null;
+    loader.onerror = null;
   }
 
-  function onFail() {
-    clearInterval(dotTimer);
-    if (retryCount < 3) {
-      var retryMsgs = ['🔄 Server busy, retrying...', '🔄 Trying again...', '🔄 Last attempt...'];
+  function showSuccess() {
+    cleanup();
+    _genActive = false;
+    var imgEl = document.getElementById('genImage');
+    imgEl.src = loader.src;
+    document.getElementById('genLoader').style.display = 'none';
+    document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
+    document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
+    document.getElementById('genModelBadge').textContent = '✅ AI Image Ready';
+    document.getElementById('genImageContainer').style.display = 'block';
+    document.getElementById('genActionRow').style.display = 'flex';
+    document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
+    recordQuestionResult(true, false);
+  }
+
+  function tryAgain(reason) {
+    cleanup();
+    if (retryCount < 4) {
+      var msgs = [
+        '⏳ Generating... please wait',
+        '🔄 Server busy, retrying...',
+        '🔄 Trying different seed...',
+        '🔄 Almost there...',
+        '🔄 One last try...'
+      ];
       var el = document.getElementById('genStatus');
-      if (el) el.textContent = retryMsgs[retryCount];
-      setTimeout(function() { generateImage(prompt, retryCount + 1); }, 3000);
+      if (el) el.textContent = msgs[retryCount + 1] || '🔄 Retrying...';
+      setTimeout(function() {
+        if (_genActive) generateImage(prompt, retryCount + 1);
+      }, 2500);
     } else {
+      _genActive = false;
       document.getElementById('genLoader').style.display = 'none';
-      document.getElementById('genStatus').textContent = '❌ Generation failed — tap Regenerate';
+      document.getElementById('genStatus').textContent = '❌ Network issue — tap Regenerate';
       document.getElementById('genTitle').textContent = '😔 Kuch galat hua';
       document.getElementById('genActionRow').style.display = 'flex';
-      document.querySelectorAll('.gen-new-btn').forEach(function(btn) { btn.style.display = ''; });
+      document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
     }
   }
 
-  // PRIMARY: fetch() gives us a blob URL — no CORS enforcement for display,
-  // works even when server is slow, proper 120s timeout control
-  var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  var fetchTimeout = setTimeout(function() {
-    if (controller) controller.abort();
-  }, 120000); // 2 minutes — Pollinations flux can be slow
+  loader.onload = function() { showSuccess(); };
+  loader.onerror = function() { tryAgain('onerror'); };
 
-  var fetchOptions = controller ? { signal: controller.signal } : {};
+  // Set timeout BEFORE setting src
+  timer = setTimeout(function() {
+    loader.onload = null;
+    loader.onerror = null;
+    loader.src = ''; // cancel
+    tryAgain('timeout');
+  }, timeoutMs);
 
-  fetch(baseUrl, fetchOptions)
-    .then(function(resp) {
-      clearTimeout(fetchTimeout);
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      return resp.blob();
-    })
-    .then(function(blob) {
-      var blobUrl = URL.createObjectURL(blob);
-      lastGeneratedBlob = blob; // save for download
-      onSuccess(blobUrl);
-    })
-    .catch(function(err) {
-      clearTimeout(fetchTimeout);
-      // FALLBACK: direct img src (no crossOrigin, so CORS not enforced by browser)
-      // This works for display but blob won't be available for canvas download
-      var img = new Image();
-      var imgTimer = setTimeout(function() {
-        img.onload = null; img.onerror = null; img.src = '';
-        onFail();
-      }, 120000);
-      img.onload = function() { clearTimeout(imgTimer); lastGeneratedBlob = null; onSuccess(img.src); };
-      img.onerror = function() { clearTimeout(imgTimer); onFail(); };
-      img.src = baseUrl;
-    });
+  loader.src = url;
 }
 
 function regenerateImage() {
+  _genActive = false; // cancel any running attempt
   document.getElementById('genImageContainer').style.display = 'none';
   document.getElementById('genActionRow').style.display = 'none';
   document.getElementById('genLoader').style.display = 'flex';
   document.getElementById('genTitle').textContent = '🎨 Creating Your Image...';
-  document.getElementById('genStatus').textContent = 'GEMINI GENERATING IMAGE...';
-  document.getElementById('genModelBadge').textContent = '🤖 Gemini AI';
+  document.getElementById('genStatus').textContent = '⏳ Generating... please wait';
+  document.getElementById('genModelBadge').textContent = '🎨 Flux AI';
   generateImage(lastPromptUsed, 0);
 }
 
 function downloadImage() {
   const img = document.getElementById('genImage');
-  if (!img.src) return;
-  // If we have a blob from fetch, use it directly — no canvas/CORS issues
-  if (lastGeneratedBlob) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(lastGeneratedBlob);
-    a.download = 'typeblast-ai-image.png';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    return;
-  }
-  // Fallback: open in new tab for manual save
-  window.open(img.src, '_blank');
+  if (!img.src || img.src === window.location.href) return;
+  // Open in new tab — user can long-press/right-click to save
+  // Canvas approach fails due to CORS on externally hosted images
+  const a = document.createElement('a');
+  a.href = img.src;
+  a.target = '_blank';
+  a.download = 'typeblast-ai-image.png';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }
 
 function shareImage() {
