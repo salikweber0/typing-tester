@@ -439,11 +439,11 @@ function showImageGenOverlay(prompt) {
   }
 
   // Update UI
-  document.getElementById('genModelBadge').textContent = `🤖 Gemini AI`;
+  _genSetBadge('🤗 HuggingFace FLUX');
   document.getElementById('genTitle').textContent = '🎨 Creating Your Image...';
   document.getElementById('genPromptDisplay').innerHTML = `<span>Your Prompt:</span><br><br>"${prompt}"`;
   document.getElementById('genLoader').style.display = 'flex';
-  document.getElementById('genStatus').textContent = '⏳ Generating... please wait';
+  _genSetStatus('⏳ Starting generation...');
   document.getElementById('genImageContainer').style.display = 'none';
   document.getElementById('genActionRow').style.display = 'none';
 
@@ -451,130 +451,350 @@ function showImageGenOverlay(prompt) {
   generateImage(prompt, 0);
 }
 
-// ── MAIN IMAGE GENERATION: Pollinations AI ──
-// crossOrigin REMOVED from img tag in HTML — that was the #1 failure cause.
-// Strategy: fetch() with 120s timeout → blob URL (best, no CORS issues)
-//           fallback → direct img.src without crossOrigin (works for display, not download)
-//           3 retries with fresh seeds on any failure
+// ══════════════════════════════════════════════════════════════
+// IMAGE GENERATION SYSTEM — Multi-provider with auto-fallback
+// Provider 1: HuggingFace Inference API (FLUX.1-schnell) — free, no key, best quality
+// Provider 2: Prodia API — free, no key, SD models
+// Provider 3: Stable Horde — community-run, free, always available
+// Pollinations removed — returns 402 for Indian IPs (their new policy)
+// ══════════════════════════════════════════════════════════════
 
-// ── IMAGE GENERATION: Pollinations AI ──
-// Simple & reliable: pure img.src, no fetch, no crossOrigin, no CORS issues.
-// Pollinations is free, no API key needed, works from any browser.
-// We load image into a hidden Image() object first, then show it on success.
+var _genActive = false;
+var _currentBlobUrl = null;
 
-var _genActive = false; // prevent duplicate calls
+// UI helpers
+function _genSetStatus(txt) {
+  var el = document.getElementById('genStatus');
+  if (el) el.textContent = txt;
+}
+function _genSetTitle(txt) {
+  var el = document.getElementById('genTitle');
+  if (el) el.textContent = txt;
+}
+function _genSetBadge(txt) {
+  var el = document.getElementById('genModelBadge');
+  if (el) el.textContent = txt;
+}
 
-function generateImage(prompt, retryCount) {
-  retryCount = retryCount || 0;
+// Show final success with blob URL
+function _genShowSuccess(blobUrl, providerName) {
+  _genActive = false;
+  if (_currentBlobUrl) URL.revokeObjectURL(_currentBlobUrl);
+  _currentBlobUrl = blobUrl;
+  var imgEl = document.getElementById('genImage');
+  imgEl.src = blobUrl;
+  document.getElementById('genLoader').style.display = 'none';
+  _genSetStatus('✨ IMAGE READY!');
+  _genSetTitle('🎉 Your Image is Here!');
+  _genSetBadge('✅ ' + providerName);
+  document.getElementById('genImageContainer').style.display = 'block';
+  document.getElementById('genActionRow').style.display = 'flex';
+  document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
+  recordQuestionResult(true, false);
+}
 
-  // Cancel any previous attempt
-  _genActive = true;
+// Show final failure after all providers exhausted
+function _genShowFailed() {
+  _genActive = false;
+  document.getElementById('genLoader').style.display = 'none';
+  _genSetStatus('❌ Sabhi servers busy hain — Regenerate try karo');
+  _genSetTitle('😔 Generation Failed');
+  document.getElementById('genActionRow').style.display = 'flex';
+  document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
+}
 
-  var seed = Math.floor(Math.random() * 999999);
+// ── PROVIDER 1: HuggingFace Inference API (FLUX.1-schnell) ──
+// Free, no API key needed, returns binary image blob
+// Best quality, fastest of the free options
+function _tryHuggingFace(prompt, onSuccess, onFail) {
+  _genSetBadge('🤗 HuggingFace FLUX');
+  _genSetStatus('🚀 Connecting to HuggingFace...');
 
-  // Keep URL clean — no excessive params that might cause 400 errors
-  var fullPrompt = encodeURIComponent(prompt + ', vibrant colors, highly detailed, sharp focus, professional digital art');
-  var url = 'https://image.pollinations.ai/prompt/' + fullPrompt
-    + '?model=flux&seed=' + seed
-    + '&width=1024&height=1024'
-    + '&nologo=true'
-    + '&safe=false';
+  var HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
+  var url = 'https://api-inference.huggingface.co/models/' + HF_MODEL;
+  var enhancedPrompt = prompt + ', vibrant colors, highly detailed, sharp focus, professional digital art, masterpiece';
 
-  document.getElementById('genModelBadge').textContent = '🎨 Flux AI';
+  var controller = window.AbortController ? new AbortController() : null;
+  var timeoutId = setTimeout(function() {
+    if (controller) controller.abort();
+    onFail('timeout');
+  }, 60000);
 
-  // Animated dots
-  var dotCount = 1;
+  var dotCount = 0;
   var dotTimer = setInterval(function() {
     dotCount = (dotCount % 3) + 1;
-    var el = document.getElementById('genStatus');
-    if (el) el.textContent = 'GENERATING IMAGE' + '.'.repeat(dotCount);
-  }, 700);
+    _genSetStatus('🤗 HuggingFace FLUX' + '.'.repeat(dotCount));
+  }, 800);
 
-  // Timeout: 3 minutes max (Pollinations can be slow under load)
-  var timeoutMs = 180000;
-  var loader = new Image();
-  var timer = null;
-
-  function cleanup() {
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inputs: enhancedPrompt }),
+    signal: controller ? controller.signal : undefined
+  })
+  .then(function(resp) {
+    clearTimeout(timeoutId);
     clearInterval(dotTimer);
-    clearTimeout(timer);
-    loader.onload = null;
-    loader.onerror = null;
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    return resp.blob();
+  })
+  .then(function(blob) {
+    if (!blob || blob.size < 1000 || blob.type.indexOf('image') === -1) {
+      throw new Error('Invalid image blob: size=' + blob.size + ' type=' + blob.type);
+    }
+    var blobUrl = URL.createObjectURL(blob);
+    onSuccess(blobUrl, 'FLUX AI');
+  })
+  .catch(function(err) {
+    clearTimeout(timeoutId);
+    clearInterval(dotTimer);
+    onFail(err.message || 'unknown');
+  });
+}
+
+// ── PROVIDER 2: Prodia API ──
+// Completely free, no API key, stable diffusion models
+// Uses polling: create job → poll until done → get image URL
+function _tryProdia(prompt, onSuccess, onFail) {
+  _genSetBadge('⚡ Prodia AI');
+  _genSetStatus('⚡ Connecting to Prodia...');
+
+  var enhancedPrompt = prompt + ', vibrant colors, highly detailed, sharp focus, digital art';
+  var createUrl = 'https://api.prodia.com/v1/job';
+
+  var dotCount = 0;
+  var dotTimer = setInterval(function() {
+    dotCount = (dotCount % 3) + 1;
+    _genSetStatus('⚡ Prodia generating' + '.'.repeat(dotCount));
+  }, 800);
+
+  var overallTimeout = setTimeout(function() {
+    clearInterval(dotTimer);
+    onFail('prodia timeout');
+  }, 90000);
+
+  // Step 1: Create job
+  fetch(createUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      model: 'dreamshaperXL10_alpha2.safetensors [c8afe2ef]',
+      prompt: enhancedPrompt,
+      negative_prompt: 'blurry, low quality, ugly, watermark',
+      steps: 25,
+      cfg_scale: 7,
+      width: 1024,
+      height: 1024,
+      sampler: 'DPM++ 2M Karras'
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Prodia create failed: ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    if (!data.job) throw new Error('No job ID returned');
+    // Step 2: Poll for completion
+    var jobId = data.job;
+    var pollCount = 0;
+    function poll() {
+      pollCount++;
+      if (pollCount > 40) { clearInterval(dotTimer); clearTimeout(overallTimeout); onFail('poll limit'); return; }
+      fetch('https://api.prodia.com/v1/job/' + jobId, { headers: { 'Accept': 'application/json' } })
+        .then(function(r) { return r.json(); })
+        .then(function(job) {
+          if (job.status === 'succeeded' && job.imageUrl) {
+            clearInterval(dotTimer);
+            clearTimeout(overallTimeout);
+            // Fetch the image as blob
+            fetch(job.imageUrl)
+              .then(function(r) { return r.blob(); })
+              .then(function(blob) {
+                var blobUrl = URL.createObjectURL(blob);
+                onSuccess(blobUrl, 'Prodia AI');
+              })
+              .catch(function() { onFail('prodia image fetch failed'); });
+          } else if (job.status === 'failed') {
+            clearInterval(dotTimer); clearTimeout(overallTimeout); onFail('prodia job failed');
+          } else {
+            setTimeout(poll, 3000);
+          }
+        })
+        .catch(function() { setTimeout(poll, 4000); });
+    }
+    setTimeout(poll, 4000);
+  })
+  .catch(function(err) {
+    clearInterval(dotTimer);
+    clearTimeout(overallTimeout);
+    onFail(err.message);
+  });
+}
+
+// ── PROVIDER 3: Stable Horde ──
+// Community-run, 100% free, no signup, always works
+// Uses anonymous key "0000000000" for free tier (slow but reliable)
+function _tryStableHorde(prompt, onSuccess, onFail) {
+  _genSetBadge('🌐 Stable Horde');
+  _genSetStatus('🌐 Connecting to Stable Horde...');
+
+  var enhancedPrompt = prompt + ', vibrant colors, highly detailed, sharp focus, digital art';
+  var ANON_KEY = '0000000000';
+
+  var dotCount = 0;
+  var dotTimer = setInterval(function() {
+    dotCount = (dotCount % 3) + 1;
+    _genSetStatus('🌐 Stable Horde processing' + '.'.repeat(dotCount));
+  }, 800);
+
+  var overallTimeout = setTimeout(function() {
+    clearInterval(dotTimer);
+    onFail('horde timeout');
+  }, 180000);
+
+  // Step 1: Submit job
+  fetch('https://stablehorde.net/api/v2/generate/async', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': ANON_KEY,
+      'Client-Agent': 'TypeBlastPro:1.0:typeblastpro.app'
+    },
+    body: JSON.stringify({
+      prompt: enhancedPrompt,
+      params: {
+        width: 512,
+        height: 512,
+        steps: 20,
+        cfg_scale: 7,
+        karras: true,
+        n: 1
+      },
+      models: ['stable_diffusion'],
+      r2: true,
+      nsfw: false,
+      censor_nsfw: true
+    })
+  })
+  .then(function(r) {
+    if (!r.ok) throw new Error('Horde submit failed: ' + r.status);
+    return r.json();
+  })
+  .then(function(data) {
+    if (!data.id) throw new Error('No job ID');
+    var jobId = data.id;
+    var pollCount = 0;
+    function pollHorde() {
+      pollCount++;
+      if (pollCount > 60) { clearInterval(dotTimer); clearTimeout(overallTimeout); onFail('horde poll limit'); return; }
+      fetch('https://stablehorde.net/api/v2/generate/check/' + jobId, {
+        headers: { 'apikey': ANON_KEY, 'Client-Agent': 'TypeBlastPro:1.0:typeblastpro.app' }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(status) {
+        if (status.done) {
+          // Get result
+          fetch('https://stablehorde.net/api/v2/generate/status/' + jobId, {
+            headers: { 'apikey': ANON_KEY, 'Client-Agent': 'TypeBlastPro:1.0:typeblastpro.app' }
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(result) {
+            clearInterval(dotTimer);
+            clearTimeout(overallTimeout);
+            var gen = result.generations && result.generations[0];
+            if (!gen || !gen.img) { onFail('no image in result'); return; }
+            // gen.img is a URL (r2=true) or base64
+            if (gen.img.startsWith('http')) {
+              fetch(gen.img)
+                .then(function(r) { return r.blob(); })
+                .then(function(blob) { onSuccess(URL.createObjectURL(blob), 'Stable Horde'); })
+                .catch(function() { onFail('horde img fetch failed'); });
+            } else {
+              // base64
+              var byteStr = atob(gen.img.replace('data:image/webp;base64,','').replace('data:image/png;base64,',''));
+              var arr = new Uint8Array(byteStr.length);
+              for (var i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
+              var blob = new Blob([arr], {type: 'image/webp'});
+              onSuccess(URL.createObjectURL(blob), 'Stable Horde');
+            }
+          })
+          .catch(function() { onFail('horde status fetch failed'); });
+        } else {
+          var waitMsg = status.wait_time ? ' (~' + status.wait_time + 's)' : '';
+          _genSetStatus('🌐 Queue position: ' + (status.queue_position || '?') + waitMsg);
+          setTimeout(pollHorde, 5000);
+        }
+      })
+      .catch(function() { setTimeout(pollHorde, 6000); });
+    }
+    setTimeout(pollHorde, 3000);
+  })
+  .catch(function(err) {
+    clearInterval(dotTimer);
+    clearTimeout(overallTimeout);
+    onFail(err.message);
+  });
+}
+
+// ── MAIN ENTRY POINT ──
+// Tries providers in order: HuggingFace → Prodia → Stable Horde
+// Each failure automatically triggers next provider
+function generateImage(prompt, providerIndex) {
+  providerIndex = providerIndex || 0;
+  _genActive = true;
+
+  var providers = [
+    { name: 'HuggingFace FLUX', fn: _tryHuggingFace },
+    { name: 'Prodia', fn: _tryProdia },
+    { name: 'Stable Horde', fn: _tryStableHorde }
+  ];
+
+  if (providerIndex >= providers.length) {
+    _genShowFailed();
+    return;
   }
 
-  function showSuccess() {
-    cleanup();
-    _genActive = false;
-    var imgEl = document.getElementById('genImage');
-    imgEl.src = loader.src;
-    document.getElementById('genLoader').style.display = 'none';
-    document.getElementById('genStatus').textContent = '✨ IMAGE READY!';
-    document.getElementById('genTitle').textContent = '🎉 Your Image is Here!';
-    document.getElementById('genModelBadge').textContent = '✅ AI Image Ready';
-    document.getElementById('genImageContainer').style.display = 'block';
-    document.getElementById('genActionRow').style.display = 'flex';
-    document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
-    recordQuestionResult(true, false);
+  var provider = providers[providerIndex];
+
+  function onSuccess(blobUrl, displayName) {
+    if (!_genActive) return;
+    _genShowSuccess(blobUrl, displayName);
   }
 
-  function tryAgain(reason) {
-    cleanup();
-    if (retryCount < 4) {
-      var msgs = [
-        '⏳ Generating... please wait',
-        '🔄 Server busy, retrying...',
-        '🔄 Trying different seed...',
-        '🔄 Almost there...',
-        '🔄 One last try...'
-      ];
-      var el = document.getElementById('genStatus');
-      if (el) el.textContent = msgs[retryCount + 1] || '🔄 Retrying...';
+  function onFail(reason) {
+    if (!_genActive) return;
+    console.warn('[ImageGen] ' + provider.name + ' failed: ' + reason);
+    var next = providerIndex + 1;
+    if (next < providers.length) {
+      _genSetStatus('⏭ ' + provider.name + ' failed, trying ' + providers[next].name + '...');
       setTimeout(function() {
-        if (_genActive) generateImage(prompt, retryCount + 1);
-      }, 2500);
+        if (_genActive) generateImage(prompt, next);
+      }, 1500);
     } else {
-      _genActive = false;
-      document.getElementById('genLoader').style.display = 'none';
-      document.getElementById('genStatus').textContent = '❌ Network issue — tap Regenerate';
-      document.getElementById('genTitle').textContent = '😔 Kuch galat hua';
-      document.getElementById('genActionRow').style.display = 'flex';
-      document.querySelectorAll('.gen-new-btn').forEach(function(b) { b.style.display = ''; });
+      _genShowFailed();
     }
   }
 
-  loader.onload = function() { showSuccess(); };
-  loader.onerror = function() { tryAgain('onerror'); };
-
-  // Set timeout BEFORE setting src
-  timer = setTimeout(function() {
-    loader.onload = null;
-    loader.onerror = null;
-    loader.src = ''; // cancel
-    tryAgain('timeout');
-  }, timeoutMs);
-
-  loader.src = url;
+  provider.fn(prompt, onSuccess, onFail);
 }
 
 function regenerateImage() {
-  _genActive = false; // cancel any running attempt
+  _genActive = false;
   document.getElementById('genImageContainer').style.display = 'none';
   document.getElementById('genActionRow').style.display = 'none';
   document.getElementById('genLoader').style.display = 'flex';
-  document.getElementById('genTitle').textContent = '🎨 Creating Your Image...';
-  document.getElementById('genStatus').textContent = '⏳ Generating... please wait';
-  document.getElementById('genModelBadge').textContent = '🎨 Flux AI';
+  _genSetTitle('🎨 Creating Your Image...');
+  _genSetStatus('⏳ Starting generation...');
+  _genSetBadge('🤗 HuggingFace FLUX');
   generateImage(lastPromptUsed, 0);
 }
 
 function downloadImage() {
-  const img = document.getElementById('genImage');
-  if (!img.src || img.src === window.location.href) return;
-  // Open in new tab — user can long-press/right-click to save
-  // Canvas approach fails due to CORS on externally hosted images
-  const a = document.createElement('a');
-  a.href = img.src;
-  a.target = '_blank';
+  var blobUrl = _currentBlobUrl;
+  if (!blobUrl) { var img = document.getElementById('genImage'); blobUrl = img && img.src; }
+  if (!blobUrl) return;
+  var a = document.createElement('a');
+  a.href = blobUrl;
   a.download = 'typeblast-ai-image.png';
   document.body.appendChild(a);
   a.click();
